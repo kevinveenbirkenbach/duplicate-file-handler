@@ -9,6 +9,12 @@ fi
 dir="$1"
 duplicates=$(find "$dir" -type f -exec md5sum {} + | sort | uniq -d -w32)
 
+if [ -z "$duplicates" ]
+then
+    echo "No duplicates found."
+    exit 0
+fi
+
 echo "Duplicates found:"
 
 echo "$duplicates" | while read line
