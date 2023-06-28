@@ -10,7 +10,7 @@ The scripts may need to be modified depending on the specific requirements of yo
 - Email: kevin@veen.world
 - Website: [https://www.veen.world](https://www.veen.world)
 
-This repository was created with the help of [OpenAI's ChatGPT](https://openai.com/research/chatgpt) (https://chat.openai.com/share/013e4367-8eca-4066-8b18-55457202ba57).
+This repository was created with the help of [OpenAI's ChatGPT](https://chat.openai.com/share/013e4367-8eca-4066-8b18-55457202ba57).
 
 ## Setup 
 These scripts will help you manage duplicate files in your directories. Please make sure to adjust permissions on the scripts to be executable with `chmod +x list_duplicates.sh delete_duplicates.sh` before running. 
