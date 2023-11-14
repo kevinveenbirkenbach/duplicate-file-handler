@@ -34,18 +34,24 @@ def handle_file_modification(original_file, duplicate_file, modification):
         print(f"Replaced {duplicate_file} with a symlink to {original_file}")
 
 def handle_modification(files, modification, mode, apply_to):
-    original_file = files[0]  # Keep the first file
-    for duplicate_file in files[1:]:  # Iterate over remaining files
-        if duplicate_file.startswith(tuple(apply_to)):
-            if mode == 'preview' and modification != 'show':
-                print(f"Would perform {modification} on {duplicate_file}")
-            elif mode == 'act':
-                handle_file_modification(original_file, duplicate_file, modification)
-            elif mode == 'interactive':
-                answer = input(f"Do you want to {modification} this file? {duplicate_file} [y/N] ")
-                if answer.lower() in ['y', 'yes']:
+    original_file = next((f for f in files if not f.startswith(tuple(apply_to))), files[0])
+    for duplicate_file in files:
+        if duplicate_file != original_file:
+            if duplicate_file.startswith(tuple(apply_to)):
+                if mode == 'preview':
+                    print(f"Would perform {modification} on {duplicate_file}")
+                elif mode == 'act':
                     handle_file_modification(original_file, duplicate_file, modification)
-        print()
+                elif mode == 'interactive':
+                    answer = input(f"Do you want to {modification} this file? {duplicate_file} [y/N] ")
+                    if answer.lower() in ['y', 'yes']:
+                        handle_file_modification(original_file, duplicate_file, modification)
+            else:
+                print(f"Duplicate file (unmodified): {duplicate_file}")
+        else:
+            print(f"Original file kept: {original_file}")
+    print()
+
 
 def main(args):
     directories = args.directories
