@@ -42,7 +42,7 @@ def handle_modification(files, modification, mode, apply_to):
     for duplicate_file in files:
         if duplicate_file != original_file:
             if duplicate_file.startswith(tuple(apply_to)):
-                if mode == 'preview':
+                if mode == 'preview' and modification != 'show':
                     print(f"Would perform {modification} on {duplicate_file}")
                 elif mode == 'act':
                     handle_file_modification(original_file, duplicate_file, modification)
@@ -52,7 +52,7 @@ def handle_modification(files, modification, mode, apply_to):
                         handle_file_modification(original_file, duplicate_file, modification)
             else:
                 print(f"Duplicate file (unmodified): {duplicate_file}")
-        else:
+        elif modification != 'show':
             print(f"Original file kept: {original_file}")
     print()
 
