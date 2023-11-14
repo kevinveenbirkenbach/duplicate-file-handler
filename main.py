@@ -20,35 +20,31 @@ def find_duplicates(directories):
                 hashes[file_hash].append(path)
     return {file_hash: paths for file_hash, paths in hashes.items() if len(paths) > 1}
 
-def handle_file_modification(file, modification):
+def handle_file_modification(original_file, duplicate_file, modification):
     if modification == 'delete':
-        print(f"Deleting {file}")
-        os.remove(file)
+        print(f"Deleting {duplicate_file}")
+        os.remove(duplicate_file)
     elif modification == 'hardlink':
-        # Find the first file that is not the same as `file` to link to
-        original_file = next((f for f in files if f != file), None)
-        if original_file:
-            os.remove(file)
-            os.link(original_file, file)
-            print(f"Replaced {file} with a hardlink to {original_file}")
+        os.remove(duplicate_file)
+        os.link(original_file, duplicate_file)
+        print(f"Replaced {duplicate_file} with a hardlink to {original_file}")
     elif modification == 'symlink':
-        original_file = next((f for f in files if f != file), None)
-        if original_file:
-            os.remove(file)
-            os.symlink(original_file, file)
-            print(f"Replaced {file} with a symlink to {original_file}")
+        os.remove(duplicate_file)
+        os.symlink(original_file, duplicate_file)
+        print(f"Replaced {duplicate_file} with a symlink to {original_file}")
 
 def handle_modification(files, modification, mode, apply_to):
-    for file in files:
-        if file.startswith(tuple(apply_to)):
+    original_file = files[0]  # Keep the first file
+    for duplicate_file in files[1:]:  # Iterate over remaining files
+        if duplicate_file.startswith(tuple(apply_to)):
             if mode == 'preview':
-                print(f"Would perform {modification} on {file}")
+                print(f"Would perform {modification} on {duplicate_file}")
             elif mode == 'act':
-                handle_file_modification(file, modification)
+                handle_file_modification(original_file, duplicate_file, modification)
             elif mode == 'interactive':
-                answer = input(f"Do you want to {modification} this file? {file} [y/N] ")
+                answer = input(f"Do you want to {modification} this file? {duplicate_file} [y/N] ")
                 if answer.lower() in ['y', 'yes']:
-                    handle_file_modification(file, modification)
+                    handle_file_modification(original_file, duplicate_file, modification)
 
 def main(args):
     directories = args.directories
