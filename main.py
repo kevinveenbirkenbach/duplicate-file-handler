@@ -37,7 +37,7 @@ def handle_modification(files, modification, mode, apply_to):
     original_file = files[0]  # Keep the first file
     for duplicate_file in files[1:]:  # Iterate over remaining files
         if duplicate_file.startswith(tuple(apply_to)):
-            if mode == 'preview':
+            if mode == 'preview' and modification != 'show':
                 print(f"Would perform {modification} on {duplicate_file}")
             elif mode == 'act':
                 handle_file_modification(original_file, duplicate_file, modification)
@@ -58,13 +58,13 @@ def main(args):
     
     for file_hash, files in duplicates.items():
         print(f"Duplicate files for hash {file_hash}:")
-        [print(file) for file in files if file.startswith(tuple(apply_to))]
+        [print(file) for file in files if file.startswith(tuple(directories))]
         handle_modification(files, args.modification, args.mode, apply_to)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Find and handle duplicate files.")
     parser.add_argument('directories', nargs='*', help="Directories to scan for duplicates.")
-    parser.add_argument('--apply-to', nargs='*', help="Directories to apply modifications to.")
+    parser.add_argument('--apply-to', nargs='*', help="Filter directories to apply modifications to.")
     parser.add_argument('--modification', choices=['delete', 'hardlink', 'symlink', 'show'], default='show', help="Modification to perform on duplicates.")
     parser.add_argument('--mode', choices=['act', 'preview', 'interactive'], default='preview', help="How to apply the modifications.")
 
