@@ -45,6 +45,7 @@ def handle_modification(files, modification, mode, apply_to):
                 answer = input(f"Do you want to {modification} this file? {duplicate_file} [y/N] ")
                 if answer.lower() in ['y', 'yes']:
                     handle_file_modification(original_file, duplicate_file, modification)
+        print()
 
 def main(args):
     directories = args.directories
