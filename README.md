@@ -1,38 +1,55 @@
 # Duplicate File Handler
 
-This repository contains two bash scripts for handling duplicate files in a directory and its subdirectories.
-
-The scripts may need to be modified depending on the specific requirements of your system or the specific use case. They currently operate by comparing the MD5 hash of files to find duplicates, which is a common but not foolproof method.
+This repository contains a Python script for identifying and handling duplicate files in a directory and its subdirectories based on their MD5 hash. It allows for filtering by file type and provides options for handling duplicates such as deletion, hard linking, or sym linking.
 
 ## Author
-
-**Kevin Veen-Birkenbach**
+- Kevin Veen-Birkenbach
 - Email: kevin@veen.world
 - Website: [https://www.veen.world](https://www.veen.world)
 
-This repository was created with the help of [OpenAI's ChatGPT](https://chat.openai.com/share/013e4367-8eca-4066-8b18-55457202ba57).
+This repository was enhanced with the help of [OpenAI's ChatGPT](https://chat.openai.com/share/825931d6-1e33-40b0-8dfc-914b3f852eeb).
 
 ## Setup 
-These scripts will help you manage duplicate files in your directories. Please make sure to adjust permissions on the scripts to be executable with `chmod +x list_duplicates.sh delete_duplicates.sh` before running. 
+To use the script, ensure you have Python installed on your system. No additional libraries are required as the script uses standard Python libraries.
 
 ## Usage
 
-### 1. List Duplicate Files
+### Identifying and Handling Duplicates
 
-`list_duplicates.sh` is a script to list all duplicate files in a specified directory and its subdirectories. For text files, it will also display the diffs.
+`main.py` is a Python script to identify all duplicate files in the specified directories. It can also filter by file type and handle duplicates by deleting them or replacing them with hard or symbolic links.
 
 ```bash
-./list_duplicates.sh /path/to/directory
+python main.py [options] directories
 ```
 
-### 2. Delete Duplicate Files
+#### Options
+- `--apply-to`: Directories to apply modifications to.
+- `--modification`: Action to perform on duplicates - `delete`, `hardlink`, `symlink`, or `show` (default).
+- `--mode`: How to apply the modifications - `act`, `preview`, `interactive` (default: `preview`).
+- `-f`, `--file-type`: Filter by file type (e.g., `.txt` for text files).
 
-`delete_duplicates.sh` is a script to find and delete duplicate files in a specified directory and its subdirectories. It will ask for confirmation before deleting each file and display the paths of its duplicates.
+### Creating Test File Structure
+
+`create_file_structure.py` is a utility script to create a test file structure with duplicate files for testing purposes.
 
 ```bash
-./delete_duplicates.sh /path/to/directory
+python create_file_structure.py
+```
+
+## Example
+
+To preview duplicate `.txt` files in `test_dir1` and `test_dir2`:
+
+```bash
+python main.py --file-type .txt --mode preview test_dir1 test_dir2
+```
+
+To interactively delete duplicates in `test_dir2`:
+
+```bash
+python main.py --apply-to test_dir2 --modification delete --mode interactive test_dir1 test_dir2
 ```
 
 ## License
 
-This project is licensed under the terms of the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.de.html).
+This project is licensed under the terms of the [MIT License](LICENSE).
