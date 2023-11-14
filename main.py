@@ -10,7 +10,7 @@ def md5sum(filename):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-def find_duplicates(directories, file_type=None):
+def find_duplicates(directories, file_type):
     hashes = defaultdict(list)
     for directory in directories:
         for root, dirs, files in os.walk(directory, followlinks=False):
@@ -60,7 +60,7 @@ def handle_modification(files, modification, mode, apply_to):
 def main(args):
     directories = args.directories
     apply_to = args.apply_to or directories
-    duplicates = find_duplicates(directories)
+    duplicates = find_duplicates(directories,args.file_type)
     
     if not duplicates:
         print("No duplicates found.")
