@@ -20,32 +20,35 @@ def find_duplicates(directories):
                 hashes[file_hash].append(path)
     return {file_hash: paths for file_hash, paths in hashes.items() if len(paths) > 1}
 
+def handle_file_modification(file, modification):
+    if modification == 'delete':
+        print(f"Deleting {file}")
+        os.remove(file)
+    elif modification == 'hardlink':
+        # Find the first file that is not the same as `file` to link to
+        original_file = next((f for f in files if f != file), None)
+        if original_file:
+            os.remove(file)
+            os.link(original_file, file)
+            print(f"Replaced {file} with a hardlink to {original_file}")
+    elif modification == 'symlink':
+        original_file = next((f for f in files if f != file), None)
+        if original_file:
+            os.remove(file)
+            os.symlink(original_file, file)
+            print(f"Replaced {file} with a symlink to {original_file}")
+
 def handle_modification(files, modification, mode, apply_to):
-    if mode == 'preview':
-        if modification == 'delete':
-            print("Would delete the following duplicate files:")
-            for file in files:
-                if file.startswith(tuple(apply_to)):
-                    print(file)
-    elif mode == 'act':
-        if modification == 'delete':
-            for file in files:
-                if file.startswith(tuple(apply_to)):
-                    print(f"Deleting {file}")
-                    os.remove(file)
-        elif modification == 'hardlink':
-            # Implement hardlink logic here
-            pass
-        elif modification == 'symlink':
-            # Implement symlink logic here
-            pass
-    elif mode == 'interactive':
-        for file in files:
-            if file.startswith(tuple(apply_to)):
+    for file in files:
+        if file.startswith(tuple(apply_to)):
+            if mode == 'preview':
+                print(f"Would perform {modification} on {file}")
+            elif mode == 'act':
+                handle_file_modification(file, modification)
+            elif mode == 'interactive':
                 answer = input(f"Do you want to {modification} this file? {file} [y/N] ")
                 if answer.lower() in ['y', 'yes']:
-                    # Implement deletion, hardlink or symlink logic here
-                    pass
+                    handle_file_modification(file, modification)
 
 def main(args):
     directories = args.directories
