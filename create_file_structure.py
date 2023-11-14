@@ -23,10 +23,17 @@ def create_test_directory(base_dir, num_files=5, duplicate_files=2, depth=1):
                 duplicate = os.path.join(dir, f"dup_{dup_num}_{file_names[i]}")
                 shutil.copyfile(original, duplicate)
 
+def copy_directory_contents(src, dst):
+    if os.path.exists(dst):
+        shutil.rmtree(dst)
+    shutil.copytree(src, dst)
+
 def create_file_structure(depth, num_files, duplicate_files):
     base_dirs = ['test_dir1', 'test_dir2']
     for base_dir in base_dirs:
         create_test_directory(base_dir, num_files, duplicate_files, depth)
+
+    copy_directory_contents('test_dir1', 'test_dir3')
 
     print("Test file structure created.")
 
