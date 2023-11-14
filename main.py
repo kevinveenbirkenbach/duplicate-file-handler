@@ -2,6 +2,7 @@ import os
 import argparse
 import hashlib
 from collections import defaultdict
+from tqdm import tqdm
 
 def md5sum(filename):
     hash_md5 = hashlib.md5()
@@ -13,10 +14,10 @@ def md5sum(filename):
 def find_duplicates(directories, file_type):
     hashes = defaultdict(list)
     for directory in directories:
-        for root, dirs, files in os.walk(directory, followlinks=False):
+        for root, dirs, files in tqdm(os.walk(directory, followlinks=False), desc="Indexing files", unit="dir"):
             for filename in files:
                 if file_type and not filename.endswith(file_type):
-                    continue  
+                    continue
                 path = os.path.join(root, filename)
                 if not os.path.islink(path):
                     file_hash = md5sum(path)
