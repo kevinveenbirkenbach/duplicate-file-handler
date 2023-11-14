@@ -65,16 +65,20 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Find and handle duplicate files.")
-    parser.add_argument('directories', nargs='*', default=['./'], help="Directories to scan for duplicates.")
+    parser.add_argument('directories', nargs='*', help="Directories to scan for duplicates.")
     parser.add_argument('--apply-to', nargs='*', help="Directories to apply modifications to.")
     parser.add_argument('--modification', choices=['delete', 'hardlink', 'symlink', 'show'], default='show', help="Modification to perform on duplicates.")
     parser.add_argument('--mode', choices=['act', 'preview', 'interactive'], default='preview', help="How to apply the modifications.")
-    
+
     args = parser.parse_args()
     
+    if not args.directories:
+        parser.print_help()
+        parser.exit()
+
     if args.apply_to and args.modification not in ['delete', 'hardlink', 'symlink']:
         parser.error("--apply-to requires --modification to be 'delete', 'hardlink', or 'symlink'.")
     if not args.apply_to and args.modification != 'show':
         parser.error("Without --apply-to only 'show' modification is allowed.")
-    
+
     main(args)
