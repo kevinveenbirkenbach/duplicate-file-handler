@@ -45,20 +45,24 @@ def handle_duplicates(duplicates):
                 [print(duplicate) for duplicate in files if duplicate != file]
                 delete_file(file)
 
-def main(directory):
-    if not directory:
-        print("Directory path not provided")
-        return
-
-    duplicates = find_duplicates(directory)
-    if not duplicates:
+def main(directories):
+    all_duplicates = defaultdict(list)
+    for directory in directories:
+        if not os.path.isdir(directory):
+            print(f"Directory not found: {directory}")
+            continue
+        duplicates = find_duplicates(directory)
+        for hash, files in duplicates.items():
+            all_duplicates[hash].extend(files)
+    
+    if not all_duplicates:
         print("No duplicates found.")
         return
 
-    handle_duplicates(duplicates)
+    handle_duplicates(all_duplicates)
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        main(sys.argv[1])
+        main(sys.argv[1:])
     else:
-        print("Usage: python3 script.py <directory>")
+        print("Usage: python3 script.py <directory1> <directory2> ...")
