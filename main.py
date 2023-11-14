@@ -22,8 +22,8 @@ def find_duplicates(directories):
 
 def handle_modification(files, modification, mode, apply_to):
     if mode == 'preview':
-        if modification == 'show':
-            print("Would show the following duplicate files:")
+        if modification == 'delete':
+            print("Would delete the following duplicate files:")
             for file in files:
                 if file.startswith(tuple(apply_to)):
                     print(file)
@@ -57,11 +57,9 @@ def main(args):
         return
     
     for file_hash, files in duplicates.items():
-        if args.mode == 'preview' or (args.mode == 'interactive' and args.modification == 'show'):
-            print(f"Duplicate files for hash {file_hash}:")
-            [print(file) for file in files if file.startswith(tuple(apply_to))]
-        else:
-            handle_modification(files, args.modification, args.mode, apply_to)
+        print(f"Duplicate files for hash {file_hash}:")
+        [print(file) for file in files if file.startswith(tuple(apply_to))]
+        handle_modification(files, args.modification, args.mode, apply_to)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Find and handle duplicate files.")
