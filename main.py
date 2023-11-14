@@ -14,7 +14,7 @@ def md5sum(filename):
 def find_duplicates(directories, file_type):
     hashes = defaultdict(list)
     for directory in directories:
-        for root, dirs, files in tqdm(os.walk(directory, followlinks=False), desc="Indexing files", unit="dir"):
+        for root, dirs, files in tqdm(os.walk(directory, followlinks=False), desc=f"Indexing files of {directory}", unit="dir"):
             for filename in files:
                 if file_type and not filename.endswith(file_type):
                     continue
