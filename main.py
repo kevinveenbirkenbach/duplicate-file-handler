@@ -13,12 +13,14 @@ def md5sum(filename):
 def find_duplicates(directories):
     hashes = defaultdict(list)
     for directory in directories:
-        for root, dirs, files in os.walk(directory):
+        for root, dirs, files in os.walk(directory, followlinks=False):
             for filename in files:
                 path = os.path.join(root, filename)
-                file_hash = md5sum(path)
-                hashes[file_hash].append(path)
+                if not os.path.islink(path):
+                    file_hash = md5sum(path)
+                    hashes[file_hash].append(path)
     return {file_hash: paths for file_hash, paths in hashes.items() if len(paths) > 1}
+
 
 def handle_file_modification(original_file, duplicate_file, modification):
     if modification == 'delete':
