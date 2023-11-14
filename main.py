@@ -10,11 +10,13 @@ def md5sum(filename):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-def find_duplicates(directories):
+def find_duplicates(directories, file_type=None):
     hashes = defaultdict(list)
     for directory in directories:
         for root, dirs, files in os.walk(directory, followlinks=False):
             for filename in files:
+                if file_type and not filename.endswith(file_type):
+                    continue  
                 path = os.path.join(root, filename)
                 if not os.path.islink(path):
                     file_hash = md5sum(path)
@@ -75,6 +77,7 @@ if __name__ == "__main__":
     parser.add_argument('--apply-to', nargs='*', help="Filter directories to apply modifications to.")
     parser.add_argument('--modification', choices=['delete', 'hardlink', 'symlink', 'show'], default='show', help="Modification to perform on duplicates.")
     parser.add_argument('--mode', choices=['act', 'preview', 'interactive'], default='preview', help="How to apply the modifications.")
+    parser.add_argument('-f', '--file-type', help="Filter by file type (e.g., '.txt' for text files).", default=None)
 
     args = parser.parse_args()
     
