@@ -1,8 +1,7 @@
 import os
-import sys
+import argparse
 import hashlib
 from collections import defaultdict
-from filecmp import dircmp
 
 def md5sum(filename):
     hash_md5 = hashlib.md5()
@@ -11,58 +10,71 @@ def md5sum(filename):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-def find_duplicates(directory):
+def find_duplicates(directories):
     hashes = defaultdict(list)
-    for root, dirs, files in os.walk(directory):
-        for filename in files:
-            path = os.path.join(root, filename)
-            file_hash = md5sum(path)
-            hashes[file_hash].append(path)
+    for directory in directories:
+        for root, dirs, files in os.walk(directory):
+            for filename in files:
+                path = os.path.join(root, filename)
+                file_hash = md5sum(path)
+                hashes[file_hash].append(path)
     return {file_hash: paths for file_hash, paths in hashes.items() if len(paths) > 1}
 
-def print_diff(files):
-    print("Text file differences:")
-    for i in range(len(files) - 1):
-        os.system(f"diff {files[i]} {files[i+1]}")
-
-def delete_file(file_path):
-    confirm = input(f"Do you want to delete this file? {file_path} [y/N] ")
-    if confirm.lower() in ["y", "yes"]:
-        os.remove(file_path)
-        print(f"Deleted {file_path}")
-
-def handle_duplicates(duplicates):
-    for file_hash, files in duplicates.items():
-        print(f"Duplicate files for hash {file_hash}:")
-        for file in files:
-            print(file)
-        if "text" in os.popen(f"file -b --mime-type '{files[0]}'").read():
-            print_diff(files)
-        else:
+def handle_modification(files, modification, mode, apply_to):
+    if mode == 'preview':
+        if modification == 'show':
+            print("Would show the following duplicate files:")
             for file in files:
-                print(f"File: {file}")
-                print("Duplicate(s) of this file:")
-                [print(duplicate) for duplicate in files if duplicate != file]
-                delete_file(file)
+                if file.startswith(tuple(apply_to)):
+                    print(file)
+    elif mode == 'act':
+        if modification == 'delete':
+            for file in files:
+                if file.startswith(tuple(apply_to)):
+                    print(f"Deleting {file}")
+                    os.remove(file)
+        elif modification == 'hardlink':
+            # Implement hardlink logic here
+            pass
+        elif modification == 'symlink':
+            # Implement symlink logic here
+            pass
+    elif mode == 'interactive':
+        for file in files:
+            if file.startswith(tuple(apply_to)):
+                answer = input(f"Do you want to {modification} this file? {file} [y/N] ")
+                if answer.lower() in ['y', 'yes']:
+                    # Implement deletion, hardlink or symlink logic here
+                    pass
 
-def main(directories):
-    all_duplicates = defaultdict(list)
-    for directory in directories:
-        if not os.path.isdir(directory):
-            print(f"Directory not found: {directory}")
-            continue
-        duplicates = find_duplicates(directory)
-        for hash, files in duplicates.items():
-            all_duplicates[hash].extend(files)
+def main(args):
+    directories = args.directories
+    apply_to = args.apply_to or directories
+    duplicates = find_duplicates(directories)
     
-    if not all_duplicates:
+    if not duplicates:
         print("No duplicates found.")
         return
-
-    handle_duplicates(all_duplicates)
+    
+    for file_hash, files in duplicates.items():
+        if args.mode == 'preview' or (args.mode == 'interactive' and args.modification == 'show'):
+            print(f"Duplicate files for hash {file_hash}:")
+            [print(file) for file in files if file.startswith(tuple(apply_to))]
+        else:
+            handle_modification(files, args.modification, args.mode, apply_to)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        main(sys.argv[1:])
-    else:
-        print("Usage: python3 script.py <directory1> <directory2> ...")
+    parser = argparse.ArgumentParser(description="Find and handle duplicate files.")
+    parser.add_argument('directories', nargs='*', default=['./'], help="Directories to scan for duplicates.")
+    parser.add_argument('--apply-to', nargs='*', help="Directories to apply modifications to.")
+    parser.add_argument('--modification', choices=['delete', 'hardlink', 'symlink', 'show'], default='show', help="Modification to perform on duplicates.")
+    parser.add_argument('--mode', choices=['act', 'preview', 'interactive'], default='preview', help="How to apply the modifications.")
+    
+    args = parser.parse_args()
+    
+    if args.apply_to and args.modification not in ['delete', 'hardlink', 'symlink']:
+        parser.error("--apply-to requires --modification to be 'delete', 'hardlink', or 'symlink'.")
+    if not args.apply_to and args.modification != 'show':
+        parser.error("Without --apply-to only 'show' modification is allowed.")
+    
+    main(args)
